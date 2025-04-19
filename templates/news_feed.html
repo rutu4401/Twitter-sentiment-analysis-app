@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News Checker Feed</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .header {
+            background-color: #1DA1F2;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: white;
+        }
+
+        .back-btn {
+            background-color: white;
+            color: #1DA1F2;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #e6f4ff;
+        }
+
+        .form-container {
+            background-color: white;
+            color: black;
+            max-width: 700px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+
+        textarea {
+            width: 90%;
+            background-color: #fff;
+            color: #333;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            resize: none;
+            height: 120px;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="file"] {
+            margin-top: 1rem;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #1da1f2;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 90%;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0d8ecf;
+        }
+
+        .feed-container {
+            max-width: 700px;
+            margin: 3rem auto;
+        }
+
+        .post-card {
+            background-color: #fff;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #ddd;
+            display: flex;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #536471;
+            flex-shrink: 0;
+        }
+
+        .post-content {
+            flex: 1;
+        }
+
+        .post-header {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .username {
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .timestamp {
+            color: #71767b;
+            font-size: 0.9rem;
+        }
+
+        .post-text {
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .post-image img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            margin-top: 1rem;
+        }
+
+        .prediction {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .prediction strong {
+            font-weight: bold;
+        }
+
+        .no-posts {
+            text-align: center;
+            margin-top: 3rem;
+            color: #777;
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <i class="fas fa-newspaper"></i><span>News Checker Feed</span>
+        </div>
+        <a href="{{ url_for('predict') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+            <textarea name="news_text" placeholder="Paste news or claim to verify..." required></textarea>
+            <input type="file" name="news_image">
+            &nbsp;&nbsp;&nbsp;&nbsp;<button type="submit">Check News</button>
+        </form>
+    </div>
+
+    <div class="feed-container">
+        {% if news_items %}
+            {% for post in news_items %}
+                <div class="post-card">
+                    <div class="avatar"></div>
+                    <div class="post-content">
+                        <div class="post-header">
+                            <span class="username">@{{ post.username }}</span>
+                        </div>
+                        <div class="post-text">
+                            <strong>News:</strong> {{ post.news_text }}
+                        </div>
+                        {% if post.image_file %}
+                        <div class="post-image">
+                            <img src="{{ url_for('static', filename='uploads/' ~ post.image_file) }}" alt="News Image">
+                        </div>
+                        {% endif %}
+                        <div class="prediction">
+                            Prediction: <strong>{{ post.prediction }}</strong> |
+                            Confidence: <strong>{{ "%.2f" % (post.confidence|float * 100) }}%</strong>
+                        </div>
+                        
+                        {% if session.get("is_admin") %}
+                        <form method="POST" action="{{ url_for('delete_news_post', post_id=post['id']) }}" style="margin-top: 10px;">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                        {% endif %}
+
+                        
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-posts">No news posts found.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

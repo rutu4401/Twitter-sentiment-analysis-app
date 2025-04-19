@@ -1,0 +1,31 @@
+<!-- templates/tweet_result.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tweet Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Tweet Sentiment Result</h1>
+
+    <div>
+        <strong>Tweet:</strong>
+        <p>{{ tweet }}</p>
+    </div>
+
+    <div>
+        <strong>Predicted Sentiment:</strong>
+        <p>{{ sentiment }}</p>
+    </div>
+
+    {% if image_file %}
+    <div>
+        <strong>Attached Image:</strong><br>
+        <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Tweet Image" width="200">
+    </div>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('tweet_feed') }}">Back to Feed</a>
+</body>
+</html>

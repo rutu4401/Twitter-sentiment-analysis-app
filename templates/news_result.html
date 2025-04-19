@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>News Check Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>News Prediction Result</h2>
+        <p><strong>News:</strong> {{ news_text }}</p>
+        <p><strong>Prediction:</strong> {{ prediction }}</p>
+        <p><strong>Confidence:</strong> {{ confidence }}</p>
+
+        {% if image_file %}
+            <p><strong>Uploaded Image:</strong></p>
+            <img src="{{ url_for('static', filename='uploads/' ~ image_file) }}" width="300">
+        {% endif %}
+
+        <br><br>
+        <a href="{{ url_for('predict') }}" class="btn btn-secondary">Back</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analyzer</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7fb;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: #1DA1F2;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .navbar-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .navbar-title i {
+            font-size: 1.6rem;
+        }
+
+        .logout-btn {
+            background-color: white;
+            color: #1DA1F2;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e6f4ff;
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-weight: 500;
+            font-size: 1.2rem;
+            color: #1DA1F2;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #1DA1F2;
+        }
+
+        /* Forms and Inputs */
+        .tweet-form {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid #ddd;
+        }
+
+        .tweet-form textarea,
+        .tweet-form input[type="file"],
+        .tweet-form button {
+            width: 90%;
+            margin-top: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .tweet-form textarea {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 1rem;
+            resize: none;
+            min-height: 120px;
+        }
+
+        .tweet-form button {
+            background-color: #1DA1F2;
+            color: white;
+            padding: 0.8rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .tweet-form button:hover {
+            background-color: #0d8ae8;
+        }
+
+        /* Toggle Buttons */
+        .toggle-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .toggle-buttons button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-buttons button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .toggle-buttons button.active {
+            background-color: #1DA1F2;
+            color: white;
+        }
+
+        /* Post Box */
+        .post-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .post-box:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #536471;
+            flex-shrink: 0;
+            margin-right: 1rem;
+        }
+
+        .post-content {
+            flex: 1;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .username {
+            color: #333;
+        }
+
+        .timestamp {
+            color: #71767b;
+            font-size: 0.85rem;
+        }
+
+        .post-text {
+            margin: 1rem 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .post-image img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            margin-top: 1rem;
+        }
+
+        .prediction {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        /* Flash Messages */
+        .flash {
+            padding: 1rem;
+            border-radius: 12px;
+            background-color: #1da1f2;
+            color: white;
+            text-align: center;
+            margin: 1.5rem auto;
+            max-width: 600px;
+        }
+
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* Hidden Class */
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-title">
+            <i class="fab fa-twitter"></i>
+            <span>Sentiment Analyzer</span>
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        <!-- Toggle Buttons -->
+        <div class="toggle-buttons">
+            <button class="active" onclick="showSection('tweet')">Tweet</button>
+            <a href="{{ url_for('check_news_route') }}">
+                <button type="button">News</button>
+            </a>
+        </div>
+
+        <!-- Tweet Check Input -->
+        <div id="tweetSection">
+            <div class="section-title">🔍 Check Tweet Sentiment</div>
+            <form action="/check_tweet_sentiment" method="post" class="tweet-form">
+                <textarea name="check_tweet" placeholder="Type something to check sentiment..." required></textarea>
+                <button type="submit">Check Sentiment</button>
+            </form>
+
+            {% if sentiment_result %}
+            <div class="flash flash-success">
+                Sentiment: <strong>{{ sentiment_result }}</strong>
+            </div>
+            {% endif %}
+
+            <!-- Tweet Post Form -->
+            <div class="section-title">📝 Post a Tweet</div>
+            <form action="/predict" method="post" enctype="multipart/form-data" class="tweet-form">
+                <textarea name="tweet" placeholder="What's happening?" required></textarea>
+                <input type="file" name="image">
+                <button type="submit">Tweet</button>
+            </form>
+        </div>
+
+        <!-- News Form -->
+        <div id="newsSection" class="hidden">
+            <div class="section-title">📰 Submit a News Headline</div>
+            <form action="/check_news" method="post" enctype="multipart/form-data" class="tweet-form">
+                <textarea name="news_text" placeholder="Enter news text..." required></textarea>
+                <input type="file" name="news_image">
+                <button type="submit">Check News</button>
+            </form>
+        </div>
+
+        <!-- Posts -->
+        {% for tweet in tweets %}
+        <div class="post-box">
+            <div class="avatar"></div>
+            <div class="post-content">
+                <div class="post-header">
+                    <span class="username">@{{ tweet['username'] or 'user' }}</span>
+                </div>
+                <div class="post-text">{{ tweet['tweet'] }}</div>
+                {% if tweet['image_filename'] %}
+                <div class="post-image">
+                    <img src="{{ url_for('static', filename='uploads/' + tweet['image_filename']) }}" alt="Tweet Image">
+                </div>
+                {% endif %}
+                <div class="prediction">
+                    Sentiment: <strong>{{ tweet['sentiment'] or 'None' }}</strong>
+                    {% if tweet['flagged'] %}
+                    | <span style="color: red;">⚠️ Flagged</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function showSection(section) {
+            const tweetSection = document.getElementById("tweetSection");
+            const newsSection = document.getElementById("newsSection");
+            const tweetBtn = document.querySelector(".toggle-buttons button:nth-child(1)");
+            const newsBtn = document.querySelector(".toggle-buttons button:nth-child(2)");
+
+            if (section === "tweet") {
+                tweetSection.classList.remove("hidden");
+                newsSection.classList.add("hidden");
+                tweetBtn.classList.add("active");
+                newsBtn.classList.remove("active");
+            } else {
+                tweetSection.classList.add("hidden");
+                newsSection.classList.remove("hidden");
+                tweetBtn.classList.remove("active");
+                newsBtn.classList.add("active");
+            }
+        }
+    </script>
+</body>
+</html>

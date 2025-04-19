@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tweet Feed</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #F0F8FF;
+        }
+        .tweet-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .tweet-card {
+            background: white;
+            border-left: 5px solid #1DA1F2;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        textarea {
+            resize: none;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+        .flash-info {
+            background-color: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+        }
+        .flash-warning {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+        }
+        .flash-danger {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+        .flash-default {
+            background-color: #e2e3e5;
+            border-left: 5px solid #6c757d;
+        }
+        .flash-message {
+            color: #000;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        #image-preview {
+            display: none;
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 2px solid #1DA1F2;
+        }
+    </style>
+</head>
+<body class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Welcome, {{ session['username'] }}</h2>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div>
+          {% for category, message in messages %}
+            {% set class_name = 'default' %}
+            {% if category == 'success' %}
+              {% set class_name = 'success' %}
+            {% elif category == 'info' %}
+              {% set class_name = 'info' %}
+            {% elif category == 'warning' %}
+              {% set class_name = 'warning' %}
+            {% elif category == 'danger' %}
+              {% set class_name = 'danger' %}
+            {% endif %}
+            <div class="flash-message flash-{{ class_name }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Tweet Form -->
+    <div class="tweet-form">
+        <form action="{{ url_for('tweet_feed') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <textarea class="form-control" name="tweet" rows="3" required placeholder="What's on your mind?"></textarea>
+            </div>
+            <div class="mb-3">
+                <input type="file" class="form-control" name="image" accept="image/*" onchange="previewImage(event)">
+                <img id="image-preview" alt="Image Preview">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Send Tweet</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <h3 class="mb-3">📝 All Tweets</h3>
+    {% for post in posts %}
+        <div class="tweet-card">
+            <strong>{{ post['username'] }}</strong>
+            <p>{{ post['tweet'] }}</p>
+            {% if post['image_filename'] %}
+                <img src="{{ url_for('static', filename='uploads/' + post['image_filename']) }}" width="100%" class="rounded">
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <script>
+        function previewImage(event) {
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function(){
+                var img = document.getElementById("image-preview");
+                img.src = reader.result;
+                img.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
